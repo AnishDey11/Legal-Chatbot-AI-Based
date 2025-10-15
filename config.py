@@ -1,8 +1,10 @@
+import streamlit as st
 import os
-from dotenv import load_dotenv
 
-BASE_DIR = os.path.dirname(__file__)
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# For deployment, Streamlit secrets are used.
+# For local development, it falls back to environment variables.
+# Create a .env file locally with your keys (e.g., OPENAI_API_KEY="sk-...")
+# Or set them as environment variables in your system.
 
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+PINECONE_API_KEY = st.secrets.get("PINECONE_API_KEY", os.getenv("PINECONE_API_KEY"))
