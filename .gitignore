@@ -1,0 +1,35 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database files
+*.db
+*.sqlite3
+
+# Configuration file with secrets
+# IMPORTANT: This file should contain your API keys.
+config.py
+
+# Directory for Streamlit's local configuration
+.streamlit/
+
+# Directory containing the source documents for the RAG pipeline.
+# You might want to track this if the files are small, but it's good practice
+# to ignore data directories.
+Legal_Chatbot_Inputs/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
