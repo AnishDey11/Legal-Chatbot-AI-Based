@@ -6,16 +6,18 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from chatbot_system_template import SYSTEM_TEMPLATE
 from langchain.schema import AIMessage, HumanMessage
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config import OPENAI_API_KEY, PINECONE_API_KEY
+import streamlit as st
 
 # Your Pinecone index
 INDEX_NAME = "legal-chatbot-index"
 
-
+@st.cache_resource
 def create_rag_chain():
+    """
+    Creates and caches the RAG chain to avoid reloading models on every run.
+    Uses Streamlit secrets for API keys.
+    """
     print("Loading RAG chain resources...")
 
     embeddings = HuggingFaceEmbeddings(
@@ -23,8 +25,15 @@ def create_rag_chain():
         model_kwargs={'device': 'cpu'}
     )
     llm = ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0.3, api_key=OPENAI_API_KEY)
-    vectorstore = PineconeVectorStore.from_existing_index(index_name=INDEX_NAME, embedding=embeddings)
-    print("Connected to Pinecone vectorstore")
+    
+    # Use a try-except block for robustness in connecting to Pinecone
+    try:
+        vectorstore = PineconeVectorStore.from_existing_index(index_name=INDEX_NAME, embedding=embeddings)
+        print("Connected to Pinecone vectorstore")
+    except Exception as e:
+        st.error(f"Failed to connect to Pinecone: {e}")
+        return None
+
     retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
     print("Retriever created")
 
@@ -42,6 +51,12 @@ def create_rag_chain():
 
 
 def ask_query(ragChain, user_query, chat_history):
+    """
+    Processes a user query using the RAG chain.
+    """
+    if not ragChain:
+        return "Error: The RAG chain is not initialized. Please check the connection to Pinecone and API keys."
+
     # Convert chat history from Streamlit's dict format to LangChain's Message format
     formatted_history = []
     for msg in chat_history:
